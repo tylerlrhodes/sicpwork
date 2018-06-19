@@ -8,8 +8,8 @@ This document is a wip, list of problems in SICP I want to do
 
 Chapter 1
  
-1.7
-1.8 - p26
+done - 1.7         
+done - 1.8 - p26
 
 1.10 - p36
 1.11 - p42
