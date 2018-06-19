@@ -1,8 +1,13 @@
 
+
+SICP Text Online
+
+https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book.html
+
 This document is a wip, list of problems in SICP I want to do
 
 Chapter 1
-
+ 
 1.7
 1.8 - p26
 
