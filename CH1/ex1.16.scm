@@ -44,12 +44,12 @@ b^n = b * b^(n-1)    -- if n is odd
 ; when n was even (this way I don't need to keep an extra b variable for the base)
 
 (define (fast-expt-i b n)
-  (define (fast-expt-iter b bn n a)
+  (define (fast-expt-iter #|b|# bn n a)
     (cond ((= n 0) a)
           ;((= n 1) (* a b))
-          ((even? n) (fast-expt-iter b (square bn) (/ n 2) a));(* a bn)))
-          (else (fast-expt-iter b bn (- n 1) (* a bn)))))
-  (fast-expt-iter b b n 1))
+          ((even? n) (fast-expt-iter #|b|# (square bn) (/ n 2) a));(* a bn)))
+          (else (fast-expt-iter #|b|# bn (- n 1) (* a bn)))))
+  (fast-expt-iter #|b|# b n 1))
 
 
 (define f fast-expt-i)
