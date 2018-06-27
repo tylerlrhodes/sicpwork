@@ -1,3 +1,8 @@
 
-*.bak
-*~
+*.*
+!*.gitattributes
+!*.gitignore
+!readme.md
+!.gitkeep
+!*.scm
+!*.md
