@@ -6,6 +6,9 @@
 (define (square x)
   (* x x))
 
+(define (cube x)
+  (* x x x))
+
 (define (even? x)
   (= (remainder x 2) 0))
 
@@ -23,6 +26,10 @@
 (define (smallest-divisor n)
   (find-divisor n 2))
 (define (find-divisor n test-divisor)
+  (define (next test-divisor)
+    (if (= 2 test-divisor)
+        (+ 1 test-divisor)
+        (+ 2 test-divisor)))
   (cond ((> (square test-divisor) n) n)
         ((divides? test-divisor n) test-divisor)
         (else (find-divisor n (+ test-divisor 1)))))
@@ -40,6 +47,17 @@
         (else
          (remainder (* base (expmod base (- exp 1) m))
                     m))))
+; (expmod 2 4 3)
+; (remainder (square (expmod 2 2 3)) 3)
+; (remainder (square (square (expmod 2 1 3))) 3)
+; (remainder (square (square (remainder (* 2 (expmod 2 0 3)) 3))) 3)
+; (remainder (square (square (remainder (* 2 (1)) 3))) 3)
+; (remainder (square (square (remainder 2 3))) 3)
+; (remainder (square (square 2)) 3)
+; (remainder (square (4)) 3)
+; (remainder 16 3)
+; (1)
+
 
 (define (fermat-test n)
   (define (try-it a)
@@ -50,4 +68,11 @@
   (cond ((= times 0) true)
         ((fermat-test n) (fast-prime? n (- times 1)))
         (else false)))
+
+(define (sum term a next b)
+  (if (> a b)
+      0
+      (+ (term a)
+         (sum term (next a) next b))))
+
 
