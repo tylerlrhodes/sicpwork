@@ -69,6 +69,10 @@
         ((fermat-test n) (fast-prime? n (- times 1)))
         (else false)))
 
+(define (identity x) x)
+
+(define (inc x) (+ 1 x))
+
 (define (sum term a next b)
   (if (> a b)
       0
