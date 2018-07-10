@@ -79,4 +79,8 @@
       (+ (term a)
          (sum term (next a) next b))))
 
+(define (average a b)
+  (/ (+ a b)
+     2))
+
 
