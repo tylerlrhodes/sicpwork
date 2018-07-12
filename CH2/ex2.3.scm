@@ -28,9 +28,11 @@
   (display (y-point p))
   (display ")"))
 
+; point with width and height
 (define (make-rect pt width height)
   (cons pt (cons width height)))
 
+; two points
 (define (make-rect2 a b)
   (cons a
         (cons 
