@@ -34,7 +34,7 @@
 
 (((add-church one one) inc) 0)
 
-
+(((add-church two one) inc) 0)
 
 
 

@@ -13,3 +13,6 @@
 ;(cons (cons (reverse (list 4 5)) (3)) (1)))
 ;(cons (cons (cons (reverse (list 5)) (4)) (3)) (1)))
 ;(cons (cons (cons (cons (reverse nil) (5)) (4)) (3)) (1)))
+
+
+
