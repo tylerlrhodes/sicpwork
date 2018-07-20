@@ -29,8 +29,7 @@
           ((odd? parity)
            (if (odd? (car nums))
                (cons (car nums) (check-vals (cdr nums)))
-               (check-vals (cdr nums))))
-          (check-vals (cdr nums))))
+               (check-vals (cdr nums))))))
   (check-vals (cons parity nums)))
 
 ; another way
