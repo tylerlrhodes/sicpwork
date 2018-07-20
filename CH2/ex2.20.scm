@@ -11,25 +11,40 @@
   (define (check-vals vals nums)
     (cond ((null? nums) vals)
           ((even? parity)
-           (if (even? (car nums)) (check-vals (append vals (list (car nums))) (cdr nums))))
+           (if (even? (car nums)) (check-vals (append vals (list (car nums))) (cdr nums))
+               (check-vals vals (cdr nums))))
           ((odd? parity)
            (if (odd? (car nums)) (check-vals (append vals (list (car nums))) (cdr nums))
                (check-vals vals (cdr nums))))))
   (check-vals (list parity) nums))
 
+; recursive process
+(define (same-parity-r parity . nums)
+  (define (check-vals nums)
+    (cond ((null? nums) nil)
+          ((even? parity)
+           (if (even? (car nums))
+               (cons (car nums) (check-vals (cdr nums)))
+               (check-vals (cdr nums))))
+          ((odd? parity)
+           (if (odd? (car nums))
+               (cons (car nums) (check-vals (cdr nums)))
+               (check-vals (cdr nums))))
+          (check-vals (cdr nums))))
+  (check-vals (cons parity nums)))
 
 ; another way
 ; http://www.billthelizard.com/2011/01/sicp-220-dotted-tail-notation.html
 (define (same-parity2 a . z)
-   (define (iter items answer)
-     (if (null? items)
-         answer
-         (iter (cdr items)
-               (if (= (remainder (car items) 2)
-                      (remainder a 2))
-                   (append answer (list (car items)))
-                   answer))))
-   (iter z (list a)))
+  (define (iter items answer)
+    (if (null? items)
+        answer
+        (iter (cdr items)
+              (if (= (remainder (car items) 2)
+                     (remainder a 2))
+                  (append answer (list (car items)))
+                  answer))))
+  (iter z (list a)))
 
 ; see https://github.com/abdulapopoola/SICPBook/blob/master/Chapter%202/2.2/Ex2.20.scm for another way too
 
