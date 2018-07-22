@@ -10,6 +10,8 @@ Chapter 2
 
 2.7 - 2.16 - return to these
 
+2.37 - return to this (learn matrix algebra or skip it)
+
 
 .
 .

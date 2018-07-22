@@ -83,7 +83,7 @@
   (/ (+ a b)
      2))
 
-(define (map proc items)
+(define (mapc proc items)
   (if (null? items)
       nil
       (cons (proc (car items))
