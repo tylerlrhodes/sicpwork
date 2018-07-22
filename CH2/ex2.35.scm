@@ -38,4 +38,14 @@
 ; Bill's solution is the simplest to understand, and arguably the one that makes the most sense
 ; as it uses the patterns described immediately before this exercise
 ;
+; There was also another solution, shown below from the comments on Bill's blog by Mike Campo
+;
 
+(define (count-leaves-2 t)
+  (accumulate + 0 (map (lambda (x)
+                         (if (pair? x)
+                             (count-leaves x)
+                             1))
+                       t)))
+
+(count-leaves-2 (list (list (list 1)) (list 2 3)))
