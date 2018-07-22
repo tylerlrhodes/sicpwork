@@ -94,6 +94,11 @@
       list2
       (cons (car list1) (append (cdr list1) list2))))
 
+(define (reverse items)
+ (if (null? items)
+     items
+     (append (reverse (cdr items)) (list (car items)))))
+
 (define (accumulate op initial sequence)
   (if (null? sequence)
       initial
