@@ -3,6 +3,8 @@
 (#%require "../Common/lib.scm")
 
 
+; http://www.billthelizard.com/2011/06/sicp-242-243-n-queens-problem.html
+;
 
 (define (make-position row col)
   (cons row col))
@@ -49,3 +51,5 @@
           (queen-cols (- k 1))))))
   (queen-cols board-size))
 
+(define l '())
+(flatmap (lambda (r) (map (lambda (new-row) (append (list new-row) r)) (enumerate-interval 1 3))) (list 1 2))
