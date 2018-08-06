@@ -134,6 +134,10 @@
         (else (append (enumerate-tree (car tree))
                       (enumerate-tree (cdr tree))))))
 
+(define (list-ref items n)
+  (if (= n 0)
+      (car items)
+      (list-ref (cdr items) (- n 1))))
 
 (define (flatmap proc seq)
   (accumulate append nil (map proc seq)))
