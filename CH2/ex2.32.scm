@@ -17,7 +17,7 @@
         (display "rest:")(display rest)(newline)
         (append rest (map (lambda (x)
                             (display "car s:")(display (car s))(newline)
-                            ;(display "x:")(display x)(newline)
+                            (display "x:")(display x)(newline)
                             (cons (car s) x)) rest)))))
 
 
