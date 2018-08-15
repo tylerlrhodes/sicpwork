@@ -50,8 +50,8 @@
   (cond ((and (null? a) (null? b)) #t)
         ((and (and (pair? a) (pair? b))
               (and (equal? (car a) (car b)) (equal? (cdr a) (cdr b)))) #t)
-        ((and (symbol? a) (symbol? b)) (eq? a b))
-        (else  #f )))
+        ((or (pair? a) (pair? b)) #f)
+        (else (eq? a b))))
 
 (equal? '(a b) '(c d))
 (equal? '(a b) '(a b))
