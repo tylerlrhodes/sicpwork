@@ -139,7 +139,7 @@
              (make-exponentiation 
                (base exp) 
                (- (exponent exp) 1))
-             (deriv (base exp)))))
+             (deriv (base exp) var))))
         (else
          (error "unknown expression type -- DERIV" exp))))
 
