@@ -4,7 +4,7 @@
 (#%require "../Common/ch2support.scm")
 
 (define (attach-tag type-tag contents)
-  (if (number? contents)
+  (if (eq? type-tag 'scheme-number)
       contents
       (cons type-tag contents)))
 
@@ -82,15 +82,6 @@
 ;: (apply + (list 1 2 3 4))
 
 
-(define (apply-generic op . args)
-  (let ((type-tags (map type-tag args)))
-    (let ((proc (get op type-tags)))
-      (if proc
-          (apply proc (map contents args))
-          (error
-           "No method for these types -- APPLY-GENERIC"
-           (list op type-tags))))))
-
 ;; Generic selectors
 
 (define (real-part z) (apply-generic 'real-part z))
@@ -116,10 +107,54 @@
 (define (equ x y) (apply-generic 'equ x y))
 
 (define (=zero? x) (apply-generic '=zero? x))
+(define (exp x y) (apply-generic 'exp x y))
+
+(define (add3 a b c) (apply-generic 'add3 a b c))
+
+(define (install-integer-number-package)
+  (define (tag x)
+    (attach-tag 'integer x))
+
+  (put 'raise '(integer)
+       (lambda (x) (make-rational x 1)))
+
+  (put 'exp '(integer integer)
+       (lambda (x y) (tag (expt x y))))
+
+  (put '=zero? '(integer)
+       (lambda (x) (= 0 x)))
+
+  (put 'equ '(integer integer)
+       (lambda (x y) (eq? x y)))
+  
+  (put 'add '(integer integer)
+       (lambda (x y) (tag (+ x y))))
+
+  (put 'sub '(integer integer)
+       (lambda (x y) (tag (- x y))))
+  (put 'mul '(integer integer)
+       (lambda (x y) (tag (* x y))))
+  (put 'div '(integer integer)
+       (lambda (x y) (tag (/ x y))))
+  (put 'make 'integer
+       (lambda (x) (tag x)))
+  'done)
+
+(install-integer-number-package)
+
+(define (make-integer n)
+  ((get 'make 'integer) (inexact->exact (round n))))
 
 (define (install-scheme-number-package)
   (define (tag x)
     (attach-tag 'scheme-number x))
+
+  (put 'raise '(scheme-number)
+       (lambda (x) (make-complex-from-real-imag x 0)))
+  
+  (put 'exp '(scheme-number scheme-number)
+       (lambda (x y) (tag (expt x y)))) ; using primitive expt
+  
   (put '=zero? '(scheme-number)
        (lambda (x) (= 0 x)))
   (put 'equ '(scheme-number scheme-number)
@@ -164,6 +199,10 @@
               (* (denom x) (numer y))))
   ;; interface to rest of the system
   (define (tag x) (attach-tag 'rational x))
+
+  (put 'raise '(rational)
+       (lambda (x) (make-scheme-number (/ (numer x) (denom x)))))
+  
   (put '=zero? '(rational)
        (lambda (x) (= 0 (numer x))))
   (put 'equ '(rational rational)
@@ -230,6 +269,9 @@
   (put 'imag-part '(complex) imag-part)
   (put 'magnitude '(complex) magnitude)
   (put 'angle '(complex) angle)
+  (put 'add3 '(complex complex complex)
+       (lambda (z1 z2 z3)
+         (add-complex z1 (add-complex z2 z3))))
   'done)
 
 (install-complex-package)
@@ -238,6 +280,17 @@
   ((get 'make-from-real-imag 'complex) x y))
 (define (make-complex-from-mag-ang r a)
   ((get 'make-from-mag-ang 'complex) r a))
+
+(define (scheme-number->complex n)
+  (make-complex-from-real-imag (contents n) 0))
+
+(put-coercion 'scheme-number 'complex scheme-number->complex)
+
+;(define (scheme-number->scheme-number n) n)
+;(define (complex->complex z) z)
+;(put-coercion 'scheme-number 'scheme-number
+;              scheme-number->scheme-number)
+;(put-coercion 'complex 'complex complex->complex)
 
 ;; 2.77
 ; This works because apply generic first resolves magnitude to the complex package,
@@ -256,6 +309,109 @@
 
 ;; 2.80
 ; implemented above
+
+; 2.81
+; a - this results in apply-generic hangining by calling itself repeatedly coercing the types
+;     because proc isn't found, however it finds the coercion method and continues trying
+
+; b - No, apply-generic works as is
+
+; c - see above
+
+; 2.82
+;
+
+(define (coerce type args result)
+  (cond ((null? args) result)
+        ((eq? (type-tag (car args)) type)
+         (coerce type (cdr args) (append result (list (car args)))))
+        (else
+         (let ((ta->tb (get-coercion (type-tag (car args)) type)))
+           (if ta->tb
+               (coerce type (cdr args) (append (list (ta->tb (car args))) result)) 
+               #f)))))
+
+; commented out for 2.84
+
+;(define (apply-generic op . args)
+;  (define (iter coercion-types)
+;    (if (null? coercion-types)
+;        (error "No method for these types, and could not coerce"
+;               (list op (map type-tag args)))
+;        (let ((coerced-args (coerce (car coercion-types) args '())))
+;          (if coerced-args
+;              (let ((proc (get op (map type-tag coerced-args))))
+;                (if proc
+;                    (apply proc (map contents coerced-args))
+;                    (iter (cdr coercion-types))))
+;              (iter (cdr coercion-types))))))
+;  (let ((type-tags (map type-tag args)))
+;    (let ((proc (get op type-tags)))
+;      (if proc
+;          (apply proc (map contents args))
+;          (iter type-tags)))))
+
+; 2.83
+
+; this asks us to desing a 'raise procedure for each type, but the book lists types we don't
+; have packages for ...
+
+; 
+
+(define (raise x) (apply-generic 'raise x))
+
+
+; 2.84
+
+; this asks us to modify apply-generic so that it coerces the arguments to have the same type
+; by successive raising.
+
+(define hierarchy (list (list 10 'integer) (list 20 'rational) (list 30 'scheme-number) (list 40 'complex)))
+
+(define (successive-raise args)
+  (define (raise-arg x t)
+    ; if x's index is less then t's index riase it
+    (if (lower-than-type? (type-tag x) t)
+        (raise-arg (raise x) t)
+        x))
+  (define (get-type-index t types)
+    (if (eq? t (cadar types))
+        (caar types)
+        (get-type-index t (cdr types))))
+  (define (lower-than-type? t1 t2)
+    (if (< (get-type-index t1 hierarchy) (get-type-index t2 hierarchy))
+        #t
+        #f))
+  (define (lower-or-equal-to-type? t1 t2)
+    (cond ((<= (get-type-index t1 hierarchy) (get-type-index t2 hierarchy)) #t)
+          (else #f)))
+  (define (find-top-type remaining top-type)
+    (cond ((null? remaining) top-type)
+          ;; if the type is less then or equal to top type, top type remains
+          ((lower-or-equal-to-type? (type-tag (car remaining)) top-type) (find-top-type (cdr remaining) top-type))
+          (else (find-top-type (cdr remaining) (type-tag (car remaining))))))
+  (define (raise-args args top-type)
+    (cond ((null? args) '())
+          (else
+           (append (list (raise-arg (car args) top-type)) (raise-args (cdr args) top-type)))))
+  (let ((top-type (find-top-type args (cadar hierarchy))))
+    (raise-args args top-type)))
+
+(define (apply-generic op . args)
+  (let ((type-tags (map type-tag args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+          (apply proc (map contents args))
+          (let ((raised-args (successive-raise args)))
+            (let ((proc (get op (map type-tag raised-args))))
+              (if proc
+                  (apply proc (map contents raised-args))
+                  (error
+                   "No method for these types -- APPLY-GENERIC"
+                   (list op type-tags)))))))))
+
+; 2.85
+; I've added in an integer package for more examples here
 
 
 
