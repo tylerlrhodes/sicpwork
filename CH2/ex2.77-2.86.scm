@@ -444,13 +444,13 @@
 (define drop-list (list 'add 'sub 'mul 'div '=zero? 'exp 'add3))
 
 (define (should-not-drop? op)
-  (define (should-drop-iter list)
+  (define (should-not-drop-iter list)
     (if (null? list)
         #t
         (if (eq? op (car list))
             #f
-            (should-drop-iter (cdr list)))))
-  (should-drop-iter drop-list))
+            (should-not-drop-iter (cdr list)))))
+  (should-not-drop-iter drop-list))
 
 (define (apply-generic op . args)
   (let ((proc (get op (map type-tag args))))
@@ -462,3 +462,9 @@
         (apply apply-generic
                op
                (successive-raise args)))))
+
+; 2.86
+; We would need to define generic operations for scheme-numbers, integers, and rationals
+; and use them in the polar and rectangular packages
+; not going to implement this
+
