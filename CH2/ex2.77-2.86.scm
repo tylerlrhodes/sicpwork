@@ -443,7 +443,7 @@
 
 (define drop-list (list 'add 'sub 'mul 'div '=zero? 'exp 'add3))
 
-(define (should-drop? op)
+(define (should-not-drop? op)
   (define (should-drop-iter list)
     (if (null? list)
         #t
@@ -456,7 +456,7 @@
   (let ((proc (get op (map type-tag args))))
     (if proc
         (let ((result (apply proc (map contents args))))
-          (if (should-drop? op)
+          (if (should-not-drop? op)
               result
               (drop result)))
         (apply apply-generic
