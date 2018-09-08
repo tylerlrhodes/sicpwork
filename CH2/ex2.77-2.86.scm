@@ -98,19 +98,6 @@
 (define (make-from-mag-ang r a)
   ((get 'make-from-mag-ang 'polar) r a))
 
-
-(define (add x y) (apply-generic 'add x y))
-(define (sub x y) (apply-generic 'sub x y))
-(define (mul x y) (apply-generic 'mul x y))
-(define (div x y) (apply-generic 'div x y))
-
-(define (equ x y) (apply-generic 'equ x y))
-
-(define (=zero? x) (apply-generic '=zero? x))
-(define (exp x y) (apply-generic 'exp x y))
-
-(define (add3 a b c) (apply-generic 'add3 a b c))
-
 (define (install-integer-number-package)
   (define (tag x)
     (attach-tag 'integer x))
@@ -169,6 +156,12 @@
        (lambda (x y) (tag (/ x y))))
   (put 'make 'scheme-number
        (lambda (x) (tag x)))
+
+  (put 'project '(scheme-number)
+       (lambda (x)
+         (let ((rational (inexact->exact x)))
+           (make-rational (numerator rational)
+                          (denominator rational)))))
   'done)
 
 (install-scheme-number-package)
@@ -220,6 +213,11 @@
 
   (put 'make 'rational
        (lambda (n d) (tag (make-rat n d))))
+
+  (put 'project '(rational)
+       (lambda (x)
+         (make-integer (round (/ (numer x) (denom x))))))
+  
   'done)
 (define (make-rational n d)
   ((get 'make 'rational) n d))
@@ -272,6 +270,10 @@
   (put 'add3 '(complex complex complex)
        (lambda (z1 z2 z3)
          (add-complex z1 (add-complex z2 z3))))
+
+  (put 'project '(complex)
+       (lambda (x) (make-scheme-number (real-part x))))
+  
   'done)
 
 (install-complex-package)
@@ -285,6 +287,18 @@
   (make-complex-from-real-imag (contents n) 0))
 
 (put-coercion 'scheme-number 'complex scheme-number->complex)
+
+(define (add x y) (apply-generic 'add x y))
+(define (sub x y) (apply-generic 'sub x y))
+(define (mul x y) (apply-generic 'mul x y))
+(define (div x y) (apply-generic 'div x y))
+
+(define (equ x y) (apply-generic 'equ x y))
+
+(define (=zero? x) (apply-generic '=zero? x))
+(define (exp x y) (apply-generic 'exp x y))
+
+(define (add3 a b c) (apply-generic 'add3 a b c))
 
 ;(define (scheme-number->scheme-number n) n)
 ;(define (complex->complex z) z)
@@ -397,21 +411,54 @@
   (let ((top-type (find-top-type args (cadar hierarchy))))
     (raise-args args top-type)))
 
-(define (apply-generic op . args)
-  (let ((type-tags (map type-tag args)))
-    (let ((proc (get op type-tags)))
-      (if proc
-          (apply proc (map contents args))
-          (let ((raised-args (successive-raise args)))
-            (let ((proc (get op (map type-tag raised-args))))
-              (if proc
-                  (apply proc (map contents raised-args))
-                  (error
-                   "No method for these types -- APPLY-GENERIC"
-                   (list op type-tags)))))))))
+;(define (apply-generic op . args)
+;  (let ((type-tags (map type-tag args)))
+;    (let ((proc (get op type-tags)))
+;      (if proc
+;          (apply proc (map contents args))
+;          (let ((raised-args (successive-raise args)))
+;            (let ((proc (get op (map type-tag raised-args))))
+;              (if proc
+;                  (apply proc (map contents raised-args))
+;                  (error
+;                   "No method for these types -- APPLY-GENERIC"
+;                   (list op type-tags)))))))))
 
 ; 2.85
 ; I've added in an integer package for more examples here
 
+; This solution seems inelegant, but it is necessary to avoid
+; dropping all operations
 
 
+
+(define (drop x)
+  (let ((project (get 'project (list (type-tag x)))))
+    (if project
+        (let ((projected (project (contents x))))
+          (if (equ projected x)
+              (drop projected)
+              x))
+        x)))
+
+(define drop-list (list 'add 'sub 'mul 'div '=zero? 'exp 'add3))
+
+(define (should-drop? op)
+  (define (should-drop-iter list)
+    (if (null? list)
+        #t
+        (if (eq? op (car list))
+            #f
+            (should-drop-iter (cdr list)))))
+  (should-drop-iter drop-list))
+
+(define (apply-generic op . args)
+  (let ((proc (get op (map type-tag args))))
+    (if proc
+        (let ((result (apply proc (map contents args))))
+          (if (should-drop? op)
+              result
+              (drop result)))
+        (apply apply-generic
+               op
+               (successive-raise args)))))
