@@ -150,6 +150,54 @@
 
 
 ;; 3.6
+;; rand-update from:
+;; https://github.com/trptcolin/sicp-study/blob/master/scheme/week-8/exercise-3.6.scm
+
+(define (rand-update x)
+  (let ((a 27) (b 26) (m 127))
+    (modulo (+ (* a x) b) m)))
+
+(define random-init 10)
+
+(define rand
+  (let ((x random-init))
+    (lambda ()
+      (set! x (rand-update x))
+      x)))
+
+(define rand2
+  (let ((x 0))
+    (define (generate)
+      (set! x (rand-update x))
+      x)
+    (define (reset new-value)
+      (set! x new-value))
+    (define (dispatch m)
+      (cond ((eq? 'generate m) (generate))
+            ((eq? 'reset m) reset)
+            (else (error "No method -- rand2" m))))
+    dispatch))
+
+;; 3.7
+;; this may be cheating ... but does exactly what the exercise says ..
+
+(define (make-joint account password new-password)
+  (lambda (m supplied-password)
+    (if (eq? supplied-password new-password)
+        (account m password)
+        (error "Incorrect Password"))))
+          
+
+;; 3.8
+
+(define f
+  (let ((first-time? #t))
+    (lambda (x)
+      (if first-time?
+          (begin (set! first-time? #f)
+                 x)
+          0))))
+
 
 
 
