@@ -124,3 +124,19 @@ w
                      (count-pairs (cdr x))
                      1))))))
 
+;; 3.18
+
+(define contains-cycle?
+  (let ((seen '()))
+    (lambda (x)
+      (cond ((not (pair? x)) #f)
+            ((memq (cdr x) seen) #t)
+            (else
+             (set! seen (cons x seen))
+             (contains-cycle? (cdr x)))))))
+
+;; 3.19 -- redo 3.18 so it only requires constant space
+;; tortiose and hare algorithm
+
+
+
