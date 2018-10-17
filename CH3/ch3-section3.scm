@@ -130,13 +130,14 @@ w
   (let ((seen '()))
     (lambda (x)
       (cond ((not (pair? x)) #f)
-            ((memq (cdr x) seen) #t)
+            ((memq x seen) #t)
             (else
              (set! seen (cons x seen))
              (contains-cycle? (cdr x)))))))
 
+(define (member? item list)
+  (list? (member item list)))
+
+
 ;; 3.19 -- redo 3.18 so it only requires constant space
 ;; tortiose and hare algorithm
-
-
-
