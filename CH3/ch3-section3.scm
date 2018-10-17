@@ -126,6 +126,9 @@ w
 
 ;; 3.18
 
+(define l3 (list 'a 'b 'c 'd 'e))
+(set-cdr! (cdddr l3) (cdr l3))
+
 (define contains-cycle?
   (let ((seen '()))
     (lambda (x)
@@ -141,3 +144,6 @@ w
 
 ;; 3.19 -- redo 3.18 so it only requires constant space
 ;; tortiose and hare algorithm
+
+
+
