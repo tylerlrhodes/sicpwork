@@ -145,7 +145,7 @@
 
 (define (contains-cycle2? l)
   (define (iter turtle hare)
-    (cond ((or (null? turtle) (null? hare)) #f)
+    (cond ((or (null? turtle) (null? hare) (null? (cdr hare))) #f)
           ((eq? turtle hare) #t)
           (else
            (iter (cdr turtle) (cddr hare)))))
