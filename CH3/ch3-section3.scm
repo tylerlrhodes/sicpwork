@@ -23,15 +23,15 @@
 (define y (list 'c 'd))
 (define z (append x y))
 
-z
+;z
 
-(cdr x)
+;(cdr x)
 
 (define w (append! x y))
 
-w
+;w
 
-(cdr x)
+;(cdr x)
 
 ;; 3.13
 
@@ -113,6 +113,7 @@ w
 ; the version above creates a new seen variable on each iteration
 ; by using a lambda and a let it creates an environment with seen which
 ; keeps track of the seen pairs
+; note its also possible to do this without using set! passing seen as an argument to count-pairs
 
 (define count-pairs
   (let ((seen '()))
@@ -138,12 +139,21 @@ w
              (set! seen (cons x seen))
              (contains-cycle? (cdr x)))))))
 
-(define (member? item list)
-  (list? (member item list)))
-
 
 ;; 3.19 -- redo 3.18 so it only requires constant space
-;; tortiose and hare algorithm
+;; turtle and rabbit algorithm
+
+(define (contains-cycle2? l)
+  (define (iter turtle hare)
+    (cond ((or (null? turtle) (null? hare)) #f)
+          ((eq? turtle hare) #t)
+          (else
+           (iter (cdr turtle) (cddr hare)))))
+  (if (or (null? l) (null? (cdr l)))
+      #f
+      (iter l (cdr l))))
+
+
 
 
 
