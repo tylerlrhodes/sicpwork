@@ -145,7 +145,10 @@
 
 (define (contains-cycle2? l)
   (define (iter turtle hare)
-    (cond ((or (null? turtle) (null? hare) (null? (cdr hare))) #f)
+    (cond ((or (null? turtle)
+               (null? hare)
+               (null? (cdr hare)))
+           #f)
           ((eq? turtle hare) #t)
           (else
            (iter (cdr turtle) (cddr hare)))))
@@ -154,6 +157,83 @@
       (iter l (cdr l))))
 
 
+;; 3.22
+
+(define (make-queue)
+  (let ((front-ptr '())
+        (rear-ptr '()))
+    (define (empty-queue?)
+      (null? front-ptr))
+    (define (front-queue)
+      (if (empty-queue?)
+          (error "FRONT alled with an empty queue" front-ptr)
+          (car front-ptr)))
+    (define (delete-queue!)
+      (cond ((empty-queue?)
+             (error "DELETE! called with an empty queue" front-ptr))
+            (else
+             (set! front-ptr (cdr front-ptr))
+             front-ptr)))
+    (define (insert-queue! item)
+      (let ((new-pair (cons item '())))
+        (cond ((empty-queue?)
+               (set! front-ptr new-pair)
+               (set! rear-ptr new-pair)
+               front-ptr)
+              (else
+               (set-cdr! rear-ptr new-pair)
+               (set! rear-ptr new-pair)
+               front-ptr))))
+    (define (dispatch m)
+      (cond ((eq? m 'insert)
+             insert-queue!)
+            ((eq? m 'delete)
+             delete-queue!)
+            ((eq? m 'front)
+             front-queue)))
+    dispatch))
+
+;; 3.26
+
+(define (make-table)
+  (list '*table*))
+
+(define (lookup key table)
+  (let ((record (assoc key (cdr table))))
+    (if record
+        (cadr record)
+        false)))
+
+(define (assoc key records)
+  (cond ((null? records) #f)
+        ((eq? key (car records)) car records)
+        ((< key (car records)) (assoc key (left-branch records)))
+        (else (assoc key (right-branch records)))))
+
+(define (insert! key value table)
+  (set-cdr! table (insert-record! key value (cdr table))))
+
+(define (insert-record! key value node)
+  (let ((record (assoc key node)))
+    (if record
+        (begin (set-car! (cdr record) value) node)      
+        (cond ((null? node)
+               (make-tree key value '() '()))
+              ((< key (node-key node))
+               (make-tree (node-key node) (node-val node) (insert-record! key value (left-branch node)) (right-branch node)))
+              (else
+               (make-tree (node-key node) (node-val node) (left-branch node) (insert-record! key value (right-branch node))))))))
+
+(define (make-tree node val left right)
+  (list node val left right))
+(define (node-key node)
+  (car node))
+(define (node-val node)
+  (cadr node))
+(define (left-branch node)
+  (caddr node))
+(define (right-branch node)
+  (cadddr node))
 
 
 
