@@ -193,6 +193,71 @@
              front-queue)))
     dispatch))
 
+
+;; 3.23
+
+
+(define (make-deque)
+  (let ((front-ptr '())
+        (rear-ptr '()))
+    (define (empty-queue?)
+      (null? front-ptr))
+    (define (front-deque)
+      (if (empty-queue?)
+          (error "error..")
+          (caar front-ptr)))
+    (define (rear-deque)
+      (if (empty-queue?)
+          (error "error...")
+          (caar rear-ptr)))
+    (define (front-delete-deque!)
+      (if (empty-queue?)
+          (error "error...")
+          (begin
+            (set! front-ptr (cdr front-ptr))
+            (if (null? front-ptr)
+                (set! rear-ptr '())
+                (set-cdr! (car front-ptr) '()))
+            front-ptr)))
+    (define (rear-delete-deque!)
+      (if (empty-queue?)
+          (error "error...")
+          (begin
+            (set! rear-ptr (cdar rear-ptr))
+            (if (null? rear-ptr)
+                (set! front-ptr '())
+                (set-cdr! rear-ptr '()))
+            front-ptr)))
+    (define (front-insert-deque! item)
+      (let ((new-pair (cons (cons item '()) front-ptr)))
+        (cond ((empty-queue?)
+               (set! front-ptr new-pair)
+               (set! rear-ptr new-pair)
+               front-ptr)
+              (else
+               (set-cdr! (car front-ptr) new-pair)
+               (set! front-ptr new-pair)
+               front-ptr))))
+    (define (rear-insert-deque! item)
+      (let ((new-pair (cons (cons item rear-ptr) '())))
+        (cond ((empty-queue?)
+               (set! front-ptr new-pair)
+               (set! rear-ptr new-pair)
+               front-ptr)
+              (else
+               (set-cdr! rear-ptr new-pair)
+               (set! rear-ptr new-pair)
+               front-ptr))))
+    (define (dispatch m)
+      (cond ((eq? m 'front-insert) front-insert-deque!)
+            ((eq? m 'rear-insert) rear-insert-deque!)
+            ((eq? m 'front) front-deque)
+            ((eq? m 'rear) rear-deque)
+            ((eq? m 'rear-delete) rear-delete-deque!)
+            ((eq? m 'front-delete) front-delete-deque!)))
+    dispatch))
+
+
 ;; 3.26
 
 (define (make-table)
