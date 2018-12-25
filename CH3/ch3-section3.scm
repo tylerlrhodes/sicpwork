@@ -301,6 +301,60 @@
 (define put (op-table 'insert-proc))
 
 
+;; 3.25
+
+
+(define (make-table-v)
+  (let ((local-table (list '*table*)))
+    (define (assoc key records)
+      (cond ((or (null? records) (not (pair? records))) #f)
+            ((equal? key (caar records)) (car records))
+            (else (assoc key (cdr records)))))
+    (define (get-val record)
+      (cond ((null? record) #f)
+            ((not (pair? record)) record)
+            (else (get-val (cdr record)))))
+    (define (lookup keylist table)
+      (if (null? keylist)
+          '()
+          (if (null? (cdr keylist))
+              (let ((record 
+                     (assoc (car keylist) (cdr table))))
+                (if record (get-val (cdr record)) #f))
+              (let ((subtable 
+                     (assoc (car keylist) (cdr table))))
+                (if subtable
+                    (lookup (cdr keylist) subtable)
+                    #f)))))
+    (define (lookup-helper . keys)
+      (lookup keys local-table))
+    (define (insert! val . keys)
+      (define (iter keys subtable)
+        (if (null? keys)
+            #f
+            (if (null? (cdr keys))
+                (let ((record (assoc (car keys) (cdr subtable))))
+                  (if record
+                      (set-cdr! record val)
+                      (set-cdr! subtable
+                                (cons (cons (car keys) val)
+                                      (cdr subtable)))))
+                (let ((sub (assoc (car keys) (cdr subtable))))
+                  (if sub
+                      (iter (cdr keys) sub)
+                      (begin
+                        (set-cdr! subtable
+                                  (cons (list (car keys))
+                                        (cdr subtable)))
+                        (iter keys subtable)))))))
+      (iter keys local-table)
+      local-table)
+    (define (dispatch m)
+      (cond ((eq? m 'insert) insert!)
+            ((eq? m 'lookup) lookup-helper)
+            ))
+    dispatch))
+
 
 ;; 3.26
 
