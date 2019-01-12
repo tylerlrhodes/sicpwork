@@ -169,12 +169,12 @@
     (constant 32 y)
     'ok))
 
-(define C (make-connector))
-(define F (make-connector))
-(celsius-fahrenheit-converter C F)
-
-(probe "Celsius temp" C)
-(probe "Fahrenheit temp" F)
+;(define C (make-connector))
+;(define F (make-connector))
+;(celsius-fahrenheit-converter C F)
+;
+;(probe "Celsius temp" C)
+;(probe "Fahrenheit temp" F)
 
 
 ;; ex 3.33
@@ -234,6 +234,33 @@
 
 
 ;; ex 3.37
+
+(define (c+ x y)
+  (let ((z (make-connector)))
+    (adder x y z)
+    z))
+
+(define (c* x y)
+  (let ((z (make-connector)))
+    (multiplier x y z)
+    z))
+
+(define (c/ x y)
+  (let ((z (make-connector)))
+    (multiplier z y x)
+    z))
+
+(define (cv x)
+  (let ((z (make-connector)))
+    (constant x z)
+    z))
+
+(define (celsius-fahrenheit-converter2 x)
+  (c+ (c* (c/ (cv 9) (cv 5))
+          x)
+      (cv 32)))
+(define C (make-connector))
+(define F (celsius-fahrenheit-converter2 C))
 
 
 
