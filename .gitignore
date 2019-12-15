@@ -6,3 +6,4 @@
 !.gitkeep
 !*.scm
 !*.md
+!*.clj
